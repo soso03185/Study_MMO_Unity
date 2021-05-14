@@ -22,7 +22,6 @@ public class SoundManager
                 _audioSources[i] = go.AddComponent<AudioSource>();
                 go.transform.parent = root.transform;
             }
-
             _audioSources[(int)Define.Sound.Bgm].loop = true;
         }
     }
@@ -37,7 +36,7 @@ public class SoundManager
         _audioClips.Clear();
     }
 
-    public void Play( string path, Define.Sound type = Define.Sound.Effect, float pitch = 1.0f)
+    public void Play(string path, Define.Sound type = Define.Sound.Effect, float pitch = 1.0f)
     {
         AudioClip audioClip = GetOrAddAudioClip(path, type);      
         Play(audioClip, type, pitch);
@@ -83,9 +82,6 @@ public class SoundManager
                 audioClip = Managers.Resource.Load<AudioClip>(path);
                 _audioClips.Add(path, audioClip);
             }
-
-            if (audioClip == null)
-                Debug.Log($"AudioClip Missing ! {path}");
         }
         if (audioClip == null)
             Debug.Log($"AudioClip Missing ! {path}");
