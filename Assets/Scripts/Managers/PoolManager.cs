@@ -32,7 +32,7 @@ public class PoolManager
         {
             if (poolable == null)
                 return;
-
+            
             poolable.transform.parent = Root;
             poolable.gameObject.SetActive(false);
             poolable.IsUsing = false;
@@ -50,6 +50,11 @@ public class PoolManager
                 poolable = Create();
 
             poolable.gameObject.SetActive(true);
+
+            // DontDestroyOnLoad 해제 용도
+            if (parent == null)
+                poolable.transform.parent = Managers.Scene.CurrentScene.transform;
+
             poolable.transform.parent = parent;
             poolable.IsUsing = true;
             return poolable;
@@ -62,7 +67,7 @@ public class PoolManager
 
     public void Init()
     {
-        if(_root = null)
+        if(_root == null)
         {
             _root = new GameObject { name = "@Pool_Root" }.transform;
             Object.DontDestroyOnLoad(_root);
@@ -105,8 +110,8 @@ public class PoolManager
 
     public void Clear()
     {
-        foreach (Transform chile in _root)
-            GameObject.Destroy(chile.gameObject);
+        foreach (Transform child in _root)
+            GameObject.Destroy(child.gameObject);
 
         _pool.Clear();
     }
