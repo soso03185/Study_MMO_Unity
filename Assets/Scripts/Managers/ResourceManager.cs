@@ -6,6 +6,10 @@ public class ResourceManager
 {
     public T Load<T> (string path) where T : Object
     {
+        if(typeof(T) == typeof(GameObject))
+        {
+
+        }
         return Resources.Load<T>(path);
     }
 
@@ -19,9 +23,11 @@ public class ResourceManager
         }
 
         GameObject go = Object.Instantiate(prefab, parent);
-        int index = go.name.IndexOf("(Clone)");
-        if (index > 0)
-            go.name = go.name.Substring(0, index);
+        go.name = prefab.name;
+
+  //      int index = go.name.IndexOf("(Clone)");
+  //      if (index > 0)
+  //          go.name = go.name.Substring(0, index);
 
         return go;
     }
