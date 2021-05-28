@@ -52,7 +52,22 @@ public class UIManager
         return sceneUI;
     }
      
-    public T MakeSubItem <T> (Transform parent = null, string name = null) where T : UI_Base
+    public T MakeWorldSpaceUI <T> (Transform parent = null, string name = null) where T : UI_Base
+    {
+        if (string.IsNullOrEmpty(name))
+            name = typeof(T).Name;
+
+        GameObject go = Managers.Resource.Instantiate($"UI/WorldSpace/{name}");
+        if (parent != null)
+            go.transform.SetParent(parent);
+
+        Canvas canvas = go.GetComponent<Canvas>();
+        canvas.renderMode = RenderMode.WorldSpace;
+        canvas.worldCamera = Camera.main;
+
+        return Utill.GetOrAddComponent<T>(go);
+    }
+    public T MakeSubItem<T>(Transform parent = null, string name = null) where T : UI_Base
     {
         if (string.IsNullOrEmpty(name))
             name = typeof(T).Name;
@@ -64,7 +79,6 @@ public class UIManager
 
         return Utill.GetOrAddComponent<T>(go);
     }
-
     public T ShowPopupUI<T>(string name = null) where T : UI_Popup
     {
         if (string.IsNullOrEmpty(name))

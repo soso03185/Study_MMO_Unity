@@ -37,15 +37,13 @@ public class PlayerController : MonoBehaviour
                 case PlayerState.Die:
                     break;
                 case PlayerState.Idle:
-                    anim.SetFloat("speed", 0);
-                    anim.SetBool("attack", false);
+                    anim.CrossFade("WAIT00", 0.1f);
                     break;
                 case PlayerState.Moving:
-                    anim.SetFloat("speed", _stat.MoveSpeed);
-                    anim.SetBool("attack", false);
+                    anim.CrossFade("RUN00_F", 0.1f);
                     break;
                 case PlayerState.Skill:
-                    anim.SetBool("attack", true);
+                    anim.CrossFade("Attack1", 0.1f, -1, 0);
                     break;
             }
         }
@@ -63,6 +61,8 @@ public class PlayerController : MonoBehaviour
         Managers.Input.MouseAction += OnMouseEvent;
 
         Managers.UI.ShowSceneUI<UI_Inven>();
+
+        Managers.UI.MakeWorldSpaceUI<UI_HPBar>(transform);
     }
 
     void UpdateDie()
@@ -97,7 +97,7 @@ public class PlayerController : MonoBehaviour
             nma.Move(dir.normalized * moveDist);
 
             Debug.DrawRay(transform.position + Vector3.up * 0.5f , dir.normalized, Color.green);
-            if(Physics.Raycast(transform.position + Vector3.up *0.5f, dir, 1.0f, LayerMask.GetMask("Block")))
+            if(Physics.Raycast(transform.position + Vector3.up * 0.5f, dir, 1.0f, LayerMask.GetMask("Block")))
             {
                 if (Input.GetMouseButton(0) == false)
                     State = PlayerState.Idle;
@@ -115,14 +115,27 @@ public class PlayerController : MonoBehaviour
 
      void UpdateSkill()
     {
-        Animator anim = GetComponent<Animator>();
-        anim.SetBool("attack", true);
+        if(_lockTarget != null)
+        {
+            Vector3 dir = _lockTarget.transform.position - transform.position;
+            Quaternion quat = Quaternion.LookRotation(dir);
+            transform.rotation = Quaternion.Lerp(transform.rotation, quat, 20 + Time.deltaTime);
+        }
+
     }
 
     void OnHitEvent()
     {
         Debug.Log("OnHitEvent");
-        State = PlayerState.Moving;
+
+        if(_stopSkill)
+        {
+            State = PlayerState.Idle;
+        }
+        else
+        { 
+            State = PlayerState.Skill;
+        }
     }
 
     void Update()
@@ -176,6 +189,7 @@ public class PlayerController : MonoBehaviour
     //}
     #endregion
 
+    bool _stopSkill = false;
     void OnMouseEvent(Define.MouseEvent evt)
     {
         switch (State)
@@ -186,12 +200,17 @@ public class PlayerController : MonoBehaviour
             case PlayerState.Moving:
                 OnMouseEvent_IdleRun(evt);
                 break;
+            case PlayerState.Skill:
+                {
+                    if(evt == Define.MouseEvent.PointerUp)                    
+                        _stopSkill = true;                    
+                }
+                break;
         }
     }
 
     void OnMouseEvent_IdleRun(Define.MouseEvent evt)
     {
-
         RaycastHit hit;
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         bool raycastHit = Physics.Raycast(ray, out hit, 100.0f, _mask);
@@ -204,7 +223,9 @@ public class PlayerController : MonoBehaviour
                     if (raycastHit)
                     {
                         _destPos = hit.point;
+                        _destPos.y = 0;
                         State = PlayerState.Moving;
+                        _stopSkill = false;
 
                         if (hit.collider.gameObject.layer == (int)Define.Layer.Monster)
                             _lockTarget = hit.collider.gameObject;
@@ -216,8 +237,14 @@ public class PlayerController : MonoBehaviour
             case Define.MouseEvent.Press:
                 {
                     if (_lockTarget == null && raycastHit)
+                    {
                         _destPos = hit.point;
+                        _destPos.y = 0;
+                    }
                 }
+                break;
+            case Define.MouseEvent.PointerUp:
+                _stopSkill = true;
                 break;
         }
     }
