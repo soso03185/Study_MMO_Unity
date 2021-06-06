@@ -43,6 +43,8 @@ public class MonsterController : BaseController
         //플레이어가 내 사정거리보다 가까우면 공격
         if (_lockTarget != null)
         {
+            _destPos = _lockTarget.transform.position;
+
             float distance = (_destPos - transform.position).magnitude;
             if (distance <= _attackRange)
             {
@@ -82,10 +84,15 @@ public class MonsterController : BaseController
     {
         if (_lockTarget != null)
         {
+            // 체력
             Stat targetStat = _lockTarget.GetComponent<Stat>();
-            Stat myStat = gameObject.GetComponent<Stat>();
-            int damage = Mathf.Max(0, myStat.Attack - targetStat.Defense);
+            int damage = Mathf.Max(0, _stat.Attack - targetStat.Defense);
             targetStat.Hp -= damage;
+
+            if(targetStat.Hp <= 0)
+            {
+                GameObject.Destroy(targetSt at.gameObject);
+            }
 
             if (targetStat.Hp > 0)
             {
