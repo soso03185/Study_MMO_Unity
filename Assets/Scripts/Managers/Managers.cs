@@ -10,7 +10,6 @@ public class Managers : MonoBehaviour
     #region Contents
     GameManagerEx _game = new GameManagerEx();
 
-
     public static GameManagerEx Game { get { return Instance._game; } }
     #endregion
 
